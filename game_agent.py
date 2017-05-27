@@ -1,9 +1,4 @@
-"""Finish all TODO items in this file to complete the isolation project, then
-test your agent's strength against a set of known agents using tournament.py
-and include the results in your report.
-"""
 import random
-
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -34,8 +29,11 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    my_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    return (my_moves - 2*opp_moves)
+    
 
 
 def custom_score_2(game, player):
@@ -212,10 +210,50 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        best_value = float('-inf')
+        best_move = (-1, -1)
+        legal_moves = game.get_legal_moves()
 
+        for move in legal_moves:
+        	new_value = max(best_value, self.min_value(game.forecast_move(move), depth-1))
+        	if new_value > best_value:
+        		best_move = move
+        		best_value = new_value
 
+        return best_move
+
+    def max_value(self, game, depth):
+    	if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+    	max_value = float('-inf')
+    	legal_moves = game.get_legal_moves()
+    	#Return the current state of the game if desired depth is reached
+    	# or we have reached a terminal node 
+    	if depth == 0 or not game.get_legal_moves():
+    		return self.score(game, self)
+
+    	for move in legal_moves:
+    		max_value = max(max_value, self.min_value(game.forecast_move(move), depth-1))
+
+    	return max_value
+
+    def min_value(self, game, depth):
+    	if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+    	min_value = float('inf')
+    	legal_moves = game.get_legal_moves()
+    	#Return the current state of the game if desired depth is reached
+    	# or we have reached a terminal node 
+    	if depth == 0 or not game.get_legal_moves():
+    		return self.score(game, self)
+
+    	for move in legal_moves:
+    		min_value = min(min_value, self.max_value(game.forecast_move(move), depth-1))
+
+    	return min_value
+        
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
     search with alpha-beta pruning. You must finish and test this player to
